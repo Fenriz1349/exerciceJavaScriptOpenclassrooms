@@ -38,7 +38,54 @@ function afficherEmail(nom, email, score) {
     let mailto = `mailto:${email}?subject=Partage du score Azertype&body=Salut, je suis ${nom} et je viens de réaliser le score ${score} sur le site d'Azertype !`
     location.href = mailto
 }
+/**cette fonction test si le nom est valide
+ * @param {string} nom : le nom du joueur
+ * @throws {Error}
+ */
+function validerNoms(nom){
+    if (nom.length<2) {
+        throw new Error(`Le champ nom est trop petit`)}
+}
 
+/**cette fonction test si le mail est valide
+ * @param {string} email : l'email de la personne avec qui il veut partager son score
+ * @throws {Error}
+ */
+function validerEmail(email){
+    let regex = new RegExp("[a-z0-9._-]+@[a-z0-9._-]+\\.[a-z0-9._-]+");
+    if (!regex.test(email)) {
+        throw new Error(`Le champ email est invalide`)}
+}
+/**cette fonction affiche un message d'erreur en cas de mauvaises saisies des noms et email
+ * 
+ */
+function afficherMessageErreur(message){
+    let spanErreurMessage=document.getElementById("erreurMessage")
+
+    if (!spanErreurMessage){
+        let popup=document.querySelector(".popup")
+        spanErreurMessage = document.createElement("span")
+        spanErreurMessage.id="erreurMessage"
+        popup.append(spanErreurMessage)
+    }
+    spanErreurMessage.innerText=message
+    
+    
+}
+/**cette fonction gere l'envoie du formulaire
+ * @param {string} scoreEmail : le score. 
+ */
+function gererFormulaire(scoreEmail){
+    try {
+        let nom=document.getElementById("nom").value
+        validerNoms(nom)
+        let email=document.getElementById("email").value
+        validerEmail(email)
+        afficherMessageErreur("")
+        afficherEmail(nom, email, scoreEmail)}
+    catch(erreur){
+        afficherMessageErreur(erreur.message)}
+}
 /**
  * Cette fonction lance le jeu. 
  * Elle demande à l'utilisateur de choisir entre "mots" et "phrases" et lance la boucle de jeu correspondante
@@ -49,10 +96,10 @@ function lancerJeu() {
     let score = 0
     let i = 0
     let listeProposition = listeMots
-
+    
     let btnValiderMot = document.getElementById("btnValiderMot")
     let inputEcriture = document.getElementById("inputEcriture")
-
+    afficherResultat(score, i)
     afficherProposition(listeProposition[i])
 
     // Gestion de l'événement click sur le bouton "valider"
@@ -87,16 +134,11 @@ function lancerJeu() {
             afficherProposition(listeProposition[i])
         })
     }
-    afficherResultat(score, i)
+    //gestion de l'envoi du score par mail
     let form=document.querySelector("form")
     form.addEventListener("submit",(event)=>{
         event.preventDefault()
-        let nom=document.getElementById("nom").value
-        let email=document.getElementById("email").value
-        console.log(nom)
-        console.log(email)
-        afficherEmail(nom, email, score)
-
+        let scoreEmail=`${score} / ${i}`
+        gererFormulaire(scoreEmail)
     })
-
 }
